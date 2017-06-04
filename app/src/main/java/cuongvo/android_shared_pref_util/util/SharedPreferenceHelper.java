@@ -9,15 +9,24 @@ import android.util.Log;
  */
 public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
 
-    private Context mContext;
     private String mPreferenceName;
     private String mKey;
     private T mValue;
 
-    public SharedPreferenceHelper(){}
+    private static Context mContext;
 
-    public SharedPreferenceHelper(Context context){
-        this.mContext = context;
+    private static SharedPreferenceHelper mSharedPreferenceHelper;
+
+    private SharedPreferenceHelper() {}
+
+    public static SharedPreferenceHelper getInstance(Context context) {
+        mContext = context;
+
+        if (mSharedPreferenceHelper == null) {
+            return new SharedPreferenceHelper();
+        } else {
+            return mSharedPreferenceHelper;
+        }
     }
 
     public String getKey() {
@@ -46,10 +55,10 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         this.mValue = value;
     }
 
-    public boolean addPreference(){
+    public boolean addPreference() {
         boolean result = true;
 
-        try{
+        try {
             SharedPreferences sharedPreferences = getSharedPreferences(mPreferenceName);
             buildPreference(sharedPreferences);
         } catch (Exception ex) {
@@ -63,41 +72,41 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         T result = null;
 
         SharedPreferences sharedPreferences = getSharedPreferences(mPreferenceName);
-        Log.d("SharedPreference", "getPreference result ");
+        Log.d("SharedPrefHelper", "getPreference result ");
 
         if (sharedPreferences.contains(key)) {
             if (classType.equals(Boolean.class)) {
-                Log.d("SharedPreference", "getPreference result Boolean");
+                Log.d("SharedPrefHelper", "getPreference result Boolean");
                 result = classType.cast(sharedPreferences.getBoolean(key, false));
 
             } else if (classType.equals(Integer.class)) {
-                Log.d("SharedPreference", "getPreference result Integer");
+                Log.d("SharedPrefHelper", "getPreference result Integer");
                 result = classType.cast(sharedPreferences.getInt(key, -1));
 
             } else if (classType.equals(Float.class)) {
-                Log.d("SharedPreference", "getPreference result Float");
+                Log.d("SharedPrefHelper", "getPreference result Float");
                 result = classType.cast(sharedPreferences.getFloat(key, -1.0F));
 
             } else if (classType.equals(Long.class)) {
-                Log.d("SharedPreference", "getPreference result Long");
+                Log.d("SharedPrefHelper", "getPreference result Long");
                 result = classType.cast(sharedPreferences.getLong(key, -1L));
 
             } else if (classType.equals(String.class)) {
-                Log.d("SharedPreference", "getPreference result String");
+                Log.d("SharedPrefHelper", "getPreference result String");
                 result = classType.cast(sharedPreferences.getString(key, null));
 
             }
         }
-        Log.d("SharedPreference", "getPreference result " + result);
+        Log.d("SharedPrefHelper", "getPreference result " + result);
         return result;
     }
 
-    public boolean isContainKey(String key){
+    public boolean isContainKey(String key) {
         SharedPreferences sharedPreferences = getSharedPreferences(mPreferenceName);
         return sharedPreferences.contains(key);
     }
 
-    private void buildPreference(SharedPreferences sharedPreferences){
+    private void buildPreference(SharedPreferences sharedPreferences) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         if (mValue.getClass().equals(Integer.class)) {
@@ -120,12 +129,12 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         editor.commit();
     }
 
-    private SharedPreferences getSharedPreferences(String preferenceName) {
+    public SharedPreferences getSharedPreferences(String preferenceName) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
         return sharedPreferences;
     }
 
-    public void clearAllSharedPreferences(Context context, String preferenceName){
+    public void clearAllSharedPreferences(Context context, String preferenceName) {
         SharedPreferences settings = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
         settings.edit().clear().commit();
     }
