@@ -1,61 +1,53 @@
 package cuongvo.android_shared_pref_util.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
  * Created by cuongvo.
  */
-public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
+public class SharedPreferenceHelper<T> {
 
     private String mPreferenceName;
     private String mKey;
     private T mValue;
-
+    
     private static Context mContext;
-
     private static SharedPreferenceHelper mSharedPreferenceHelper;
 
-    private SharedPreferenceHelper() {}
+    private SharedPreferenceHelper() {
+    }
 
     public static SharedPreferenceHelper getInstance(Context context) {
         mContext = context;
 
         if (mSharedPreferenceHelper == null) {
-            return new SharedPreferenceHelper();
-        } else {
-            return mSharedPreferenceHelper;
+            mSharedPreferenceHelper = new SharedPreferenceHelper();
         }
+        return mSharedPreferenceHelper;
+
     }
 
-    public String getKey() {
+    private String getKey() {
         return mKey;
     }
 
-    public void setKey(String key) {
+    private void setKey(String key) {
         this.mKey = key;
     }
 
-    public String getPreferenceName() {
-        return mPreferenceName;
-    }
-
-    public void setPreferenceName(String preferenceName) {
-        this.mPreferenceName = preferenceName;
-    }
-
-    @Override
-    public T getValue() {
+    private T getValue() {
         return mValue;
     }
 
-    @Override
-    public void setValue(T value) {
+    private void setValue(T value) {
         this.mValue = value;
     }
 
-    public boolean addPreference() {
+    private boolean addPreference() {
         boolean result = true;
 
         try {
@@ -68,7 +60,22 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         return result;
     }
 
-    public T getPreference(String key, Class<T> classType) {
+    public void putString(String key, String value) {
+        if (TextUtils.isEmpty(key)) {
+            throw new IllegalArgumentException("Key value can not be empty");
+        }
+
+        if (TextUtils.isEmpty(value)) {
+            throw new IllegalArgumentException("Value can not be empty, It could be an empty string or NULL");
+        }
+
+        this.setKey(key);
+        this.setValue((T) value);
+
+        addPreference();
+    }
+
+    private T getPreference(String key, Class<T> classType) {
         T result = null;
 
         SharedPreferences sharedPreferences = getSharedPreferences(mPreferenceName);
@@ -101,11 +108,6 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         return result;
     }
 
-    public boolean isContainKey(String key) {
-        SharedPreferences sharedPreferences = getSharedPreferences(mPreferenceName);
-        return sharedPreferences.contains(key);
-    }
-
     private void buildPreference(SharedPreferences sharedPreferences) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -129,6 +131,11 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         editor.commit();
     }
 
+    public boolean isContainKey(String key) {
+        SharedPreferences sharedPreferences = getSharedPreferences(mPreferenceName);
+        return sharedPreferences.contains(key);
+    }
+
     public SharedPreferences getSharedPreferences(String preferenceName) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
         return sharedPreferences;
@@ -138,4 +145,34 @@ public class SharedPreferenceHelper<T> implements ISharedPreference<T> {
         SharedPreferences settings = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
         settings.edit().clear().commit();
     }
+
+    public String getString(String key) {
+        return (String) getPreference(key, (Class<T>) String.class);
+    }
+
+    public Boolean getBoolean(String key) {
+        return (Boolean) getPreference(key, (Class<T>) Boolean.class);
+    }
+
+    public Integer getInteger(String key) {
+        return (Integer) getPreference(key, (Class<T>) Integer.class);
+    }
+
+    public Float getFloat(String key) {
+        return (Float) getPreference(key, (Class<T>) Integer.class);
+    }
+
+    public Long getLong(String key) {
+        return (Long) getPreference(key, (Class<T>) Long.class);
+    }
+
+    public String getPreferenceName() {
+        return mPreferenceName;
+    }
+
+    public SharedPreferenceHelper setPreferenceName(String preferenceName) {
+        this.mPreferenceName = preferenceName;
+        return this.mSharedPreferenceHelper;
+    }
+
 }
